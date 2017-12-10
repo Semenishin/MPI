@@ -43,7 +43,7 @@ module Homework
         x2=1
         y2=1
 
-	call mpi_init(mpiErr)
+!	call mpi_init(mpiErr)
 	call mpi_comm_size(MPI_COMM_WORLD, mpisize, mpiErr)
         call mpi_comm_rank(MPI_COMM_WORLD, mpiRank, mpiErr)
 	rank=mpiRank+1
@@ -135,7 +135,7 @@ module Homework
             x2 = tmp
          endif
 	
-		call MPI_FINALIZE(mpiErr)
+!		call MPI_FINALIZE(mpiErr)
         end subroutine
 
 
