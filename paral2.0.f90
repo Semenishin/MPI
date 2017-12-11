@@ -32,11 +32,10 @@ module Homework
             n = size(B, dim=2) 
         else
             B = A     
-            endif
+        endif
 
         allocate(current_column(m))
 
- 
         max_sum=-huge(0d0)
         x1=1
         y1=1
@@ -65,64 +64,59 @@ module Homework
                      endif 
  	      enddo
    	enddo  
-     if(mpiSize>1) then
-	if (mpiRank/=0) then	
-		do i1=1,mpisize
-		  call mpi_send(max_sum,1,MPI_REAL8,0,5,MPI_COMM_WORLD,mpiErr)
-		enddo
-	endif 
+        if(mpiSize>1) then
+		if (mpiRank/=0) then	
+			do i1=1,mpisize
+		 	 	call mpi_send(max_sum,1,MPI_REAL8,0,5,MPI_COMM_WORLD,mpiErr)
+			enddo
+		endif 
 
-	call MPI_Barrier(MPI_COMM_WORLD, mpiErr)
-	if(mpiRank==0)then
-		allocate(max_sumar(mpisize))
-		max_sumar(1)=max_sum
-		do i=1,mpisize-1
-		   call mpi_recv(max_sum,1,MPI_REAL8,i,MPI_ANY_TAG,MPI_COMM_WORLD,status,mpiErr)
-		   max_sumar(i+1)=max_sum
-		enddo
+		call MPI_Barrier(MPI_COMM_WORLD, mpiErr)
+		if(mpiRank==0)then
+			allocate(max_sumar(mpisize))
+			max_sumar(1)=max_sum
+			do i=1,mpisize-1
+		   	  	call mpi_recv(max_sum,1,MPI_REAL8,i,MPI_ANY_TAG,MPI_COMM_WORLD,status,mpiErr)
+		         	max_sumar(i+1)=max_sum
+			enddo
 
-	
+			max_sum=maxval(max_sumar)
+			do j=1,mpisize
+	  			if(max_sumar(j)==max_sum) then
+					exit
+	  			endif
+			enddo
+			deallocate(max_sumar) 
+		 endif
 
-		max_sum=maxval(max_sumar)
-		do j=1,mpisize
-	  		if(max_sumar(j)==max_sum) then
-				exit
-	  		endif
-		enddo
-		deallocate(max_sumar) 
-	endif
+		call MPI_Barrier(MPI_COMM_WORLD, mpiErr)
+		if(mpiRank==0)then
+			do i4=1,mpisize-1
+		  	   call MPI_SEND(j,1,MPI_INTEGER4,i4,571,MPI_COMM_WORLD,mpiErr)
+			enddo
+		else
+			call MPI_RECV(j,1,MPI_INTEGER4,0,571,MPI_COMM_WORLD,status,mpiErr)
+		endif
 
-	
-	call MPI_Barrier(MPI_COMM_WORLD, mpiErr)
-	if(mpiRank==0)then
-		do i4=1,mpisize-1
-		  call MPI_SEND(j,1,MPI_INTEGER4,i4,571,MPI_COMM_WORLD,mpiErr)
-		enddo
-	else
-		call MPI_RECV(j,1,MPI_INTEGER4,0,571,MPI_COMM_WORLD,status,mpiErr)
-	endif
-
-	call MPI_Barrier(MPI_COMM_WORLD, mpiErr)
-	i2=0
-	 if(mpiRank==j-1) then
-		do i2=0,mpisize-1
-		   if(i2/=j-1) then
-		call MPI_SEND(x1,1,MPI_INTEGER4,i2,17,MPI_COMM_WORLD,mpiErr)
-		call MPI_SEND(x2,1,MPI_INTEGER4,i2,18,MPI_COMM_WORLD,mpiErr)
-		call MPI_SEND(y1,1,MPI_INTEGER4,i2,19,MPI_COMM_WORLD,mpiErr)
-		call MPI_SEND(y2,1,MPI_INTEGER4,i2,20,MPI_COMM_WORLD,mpiErr)
-		   endif
-		enddo
-	else
-		call MPI_RECV(x1,1,MPI_INTEGER4,j-1,17,MPI_COMM_WORLD,status,mpiErr)
-		call MPI_RECV(x2,1,MPI_INTEGER4,j-1,18,MPI_COMM_WORLD,status,mpiErr)
-		call MPI_RECV(y1,1,MPI_INTEGER4,j-1,19,MPI_COMM_WORLD,status,mpiErr)
-		call MPI_RECV(y2,1,MPI_INTEGER4,j-1,20,MPI_COMM_WORLD,status,mpiErr)
-	endif
-    endif 
+		call MPI_Barrier(MPI_COMM_WORLD, mpiErr)
+		i2=0
+	 	if(mpiRank==j-1) then
+			do i2=0,mpisize-1
+		   		if(i2/=j-1) then
+				  call MPI_SEND(x1,1,MPI_INTEGER4,i2,17,MPI_COMM_WORLD,mpiErr)
+				  call MPI_SEND(x2,1,MPI_INTEGER4,i2,18,MPI_COMM_WORLD,mpiErr)
+				  call MPI_SEND(y1,1,MPI_INTEGER4,i2,19,MPI_COMM_WORLD,mpiErr)
+				  call MPI_SEND(y2,1,MPI_INTEGER4,i2,20,MPI_COMM_WORLD,mpiErr)
+		   		endif
+			enddo
+		else
+			call MPI_RECV(x1,1,MPI_INTEGER4,j-1,17,MPI_COMM_WORLD,status,mpiErr)
+			call MPI_RECV(x2,1,MPI_INTEGER4,j-1,18,MPI_COMM_WORLD,status,mpiErr)
+			call MPI_RECV(y1,1,MPI_INTEGER4,j-1,19,MPI_COMM_WORLD,status,mpiErr)
+			call MPI_RECV(y2,1,MPI_INTEGER4,j-1,20,MPI_COMM_WORLD,status,mpiErr)
+		endif
+    	endif 
 		
-
-
 	deallocate(current_column)
 
        	 if (transpos) then  
